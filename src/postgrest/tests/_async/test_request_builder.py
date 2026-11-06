@@ -339,6 +339,37 @@ class TestTextSearch:
             builder.request.params
         )
 
+    @pytest.mark.parametrize(
+        ("options", "operator"),
+        [
+            ({}, "fts"),
+            ({"type": "plain", "config": "english"}, "plfts(english)"),
+            ({"type": "phrase"}, "phfts"),
+            ({"type": "web_search"}, "wfts"),
+        ],
+    )
+    def test_text_search_can_chain_filter_order_and_limit(
+        self,
+        request_builder: AsyncRequestBuilder,
+        options: dict[str, str],
+        operator: str,
+    ) -> None:
+        builder = (
+            request_builder.select("id")
+            .text_search("content", "python", options)
+            .limit(10)
+            .eq("status", "published")
+            .order("id")
+        )
+
+        assert dict(builder.request.params) == {
+            "select": "id",
+            "content": f"{operator}.python",
+            "limit": "10",
+            "status": "eq.published",
+            "order": "id.asc",
+        }
+
 
 class TestExplain:
     def test_explain_plain(self, request_builder: AsyncRequestBuilder):
