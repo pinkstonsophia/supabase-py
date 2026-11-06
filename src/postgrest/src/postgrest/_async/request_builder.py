@@ -224,7 +224,7 @@ class AsyncSelectRequestBuilder(
 
     def text_search(
         self, column: str, query: str, options: dict[str, Any] = {}
-    ) -> AsyncQueryRequestBuilder:
+    ) -> AsyncSelectRequestBuilder:
         type_ = options.get("type")
         type_part = ""
         if type_ == "plain":
@@ -234,9 +234,7 @@ class AsyncSelectRequestBuilder(
         elif type_ == "web_search":
             type_part = "w"
         config_part = f"({options.get('config')})" if options.get("config") else ""
-        self.filter(column, f"{type_part}fts{config_part}", query)
-
-        return AsyncQueryRequestBuilder(self.request)
+        return self.filter(column, f"{type_part}fts{config_part}", query)
 
     def csv(self) -> AsyncSingleRequestBuilder:
         """Specify that the query must retrieve data as a single CSV string."""
